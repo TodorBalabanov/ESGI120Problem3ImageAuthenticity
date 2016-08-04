@@ -14,18 +14,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
-import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
+
+import ar.com.hjg.pngj.PngReader;
+import ar.com.hjg.pngj.PngWriter;
+import ar.com.hjg.pngj.chunks.ChunkCopyBehaviour;
 
 public class MainActivity extends AppCompatActivity {
 	/**
@@ -87,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
 		int mask[] = new int[width * height];
 
 		//TODO Check which is column and which is row.
-		for (int j = 0, gap=SMALL_MESH_GAP_SIZE/2, k = 0; j < height; j++) {
+		for (int j = 0, gap = SMALL_MESH_GAP_SIZE / 2, k = 0; j < height; j++) {
 			for (int i = 0; i < width; i++, k++) {
 				mask[k] = 0xFFFFFF;
 
@@ -96,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
 					 * Less significant bit.
 					 */
 					mask[k] &= 0xFEFEFE;
-				} else if ((gap+i) % BIG_MESH_GAP_SIZE == 0 && (gap+j) % BIG_MESH_GAP_SIZE == 0) {
+				} else if ((gap + i) % BIG_MESH_GAP_SIZE == 0 && (gap + j) % BIG_MESH_GAP_SIZE == 0) {
 					/*
 					 * Third less significant bit.
 					 */
@@ -110,12 +111,12 @@ public class MainActivity extends AppCompatActivity {
 
 	/**
 	 * Put zeros in each bit which will be used during watarmarking process.
-	 *
 	 * @param pixels Array with RGB image pixels.
 	 * @param width  Width of the image.
 	 * @param height Height of the image.
+	 * @return Mask wich will be used for watermarking.
 	 */
-	private void zeroWatarmarkBits(int pixels[], int width, int height) {
+	private int[] zeroWatarmarkBits(int pixels[], int width, int height) {
 		if (pixels == null || pixels.length != width * height) {
 			//TODO Exception handling.
 		}
@@ -125,10 +126,11 @@ public class MainActivity extends AppCompatActivity {
 		for (int k = 0; k < mask.length && k < pixels.length; k++) {
 			pixels[k] &= mask[k];
 		}
+
+		return mask;
 	}
 
 	/**
-	 *
 	 * @param pixels
 	 * @param key
 	 * @return
@@ -223,8 +225,16 @@ public class MainActivity extends AppCompatActivity {
 	 * @param name  Name of the file.
 	 */
 	private void saveImageToFile(Bitmap image, long crcs[], String name) {
+		/*
+		 * Temporary file without meta data written.
+		 */
+		File noMetadataPng = new File("" + System.currentTimeMillis() + ".png");
+
+		/*
+		 * Store PNG file in the local file system.
+		 */
 		try {
-			FileOutputStream out = new FileOutputStream(new File(name));
+			FileOutputStream out = new FileOutputStream(noMetadataPng);
 			image.compress(Bitmap.CompressFormat.PNG, 100, out);
 			out.close();
 		} catch (FileNotFoundException e) {
@@ -233,16 +243,42 @@ public class MainActivity extends AppCompatActivity {
 			e.printStackTrace();
 		}
 
-		//TODO Put CRCs in file meta data.
+		/*
+		 * Put image size and CRCs in file meta data.
+		 */
+		PngReader reader = new PngReader(noMetadataPng);
+		PngWriter writer = new PngWriter(new File(name), reader.imgInfo, true);
+		writer.copyChunksFrom(reader.getChunksList(), ChunkCopyBehaviour.COPY_ALL);
+
+		//TODO Create parameters for keys as constants or as meta data in manifest file.
+		writer.getMetadata().setText("width", "" + image.getWidth());
+		writer.getMetadata().setText("heigth", "" + image.getHeight());
+
+		/*
+		 * Add CRC values.
+		 */
+		for (int i = 0; i < crcs.length; i++) {
+			writer.getMetadata().setText("CRC" + i, "" + crcs[i]);
+		}
+
+		/*
+		 * Copy image information.
+		 */
+		for (int row = 0; row < reader.imgInfo.rows; row++) {
+			writer.writeRow(reader.readRow());
+		}
+
+		/*
+		 * Close files.
+		 */
+		reader.end();
+		writer.end();
 	}
 
 	/**
-	 *
-	 *
 	 * @param pixels
 	 * @param width
 	 * @param height
-	 *
 	 * @return
 	 */
 	private long[] calculateCRCs(int[] pixels, int width, int height) {
@@ -262,7 +298,7 @@ public class MainActivity extends AppCompatActivity {
 		 */
 		for (int q = 0, l = 0; q < height; q += SMALL_MESH_GAP_SIZE) {
 			for (int p = 0; p < width; p += SMALL_MESH_GAP_SIZE, l++) {
-				Arrays.fill(pixelsAsBytes, (byte)0);
+				Arrays.fill(pixelsAsBytes, (byte) 0);
 
 				/*
 				 * Analyse squares.
@@ -285,7 +321,6 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	/**
-	 *
 	 * @param savedInstanceState
 	 */
 	@Override
@@ -295,7 +330,6 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	/**
-	 *
 	 * @param view
 	 */
 	public void takePhoto(View view) {
@@ -306,7 +340,6 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	/**
-	 *
 	 * @param requestCode
 	 * @param resultCode
 	 * @param data
@@ -332,7 +365,7 @@ public class MainActivity extends AppCompatActivity {
 			/*
 			 * Put zeros all bits which will be used in the watermarking process.
 			 */
-			zeroWatarmarkBits(pixels, bitmap.getWidth(), bitmap.getHeight());
+			int[] mask = zeroWatarmarkBits(pixels, bitmap.getWidth(), bitmap.getHeight());
 
 			/*
 			 * DSA digital sign.
@@ -346,8 +379,11 @@ public class MainActivity extends AppCompatActivity {
 			 */
 			long[] crcCodes = calculateCRCs(pixels, bitmap.getWidth(), bitmap.getHeight());
 
+			//TODO Gray codes mash generation.
+			int[] mesh = null;//grayCodesMesh(mask, bitmap.getWidth(), bitmap.getHeight());
+
 			//TODO Watermarking with digital stamp.
-			int[] steganography = null;//watermarkTheImage(pixels, digitalSignature);
+			int[] steganography = null;//watermarkTheImage(pixels, signature, gray);
 
 			/*
 			 * SNR calculation.

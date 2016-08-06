@@ -7,6 +7,7 @@ import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -49,33 +50,308 @@ public class MainActivity extends AppCompatActivity {
 	 */
 	private static int BIG_MESH_GAP_SIZE = 128;
 
+	private static int GRAY_CODES_8[][] = {
+			  {0, 0, 0, 0, 0, 0, 0, 0,},
+			  {0, 0, 0, 0, 0, 0, 0, 1,},
+			  {0, 0, 0, 0, 0, 0, 1, 1,},
+			  {0, 0, 0, 0, 0, 0, 1, 0,},
+			  {0, 0, 0, 0, 0, 1, 1, 0,},
+			  {0, 0, 0, 0, 0, 1, 1, 1,},
+			  {0, 0, 0, 0, 0, 1, 0, 1,},
+			  {0, 0, 0, 0, 0, 1, 0, 0,},
+			  {0, 0, 0, 0, 1, 1, 0, 0,},
+			  {0, 0, 0, 0, 1, 1, 0, 1,},
+			  {0, 0, 0, 0, 1, 1, 1, 1,},
+			  {0, 0, 0, 0, 1, 1, 1, 0,},
+			  {0, 0, 0, 0, 1, 0, 1, 0,},
+			  {0, 0, 0, 0, 1, 0, 1, 1,},
+			  {0, 0, 0, 0, 1, 0, 0, 1,},
+			  {0, 0, 0, 0, 1, 0, 0, 0,},
+			  {0, 0, 0, 1, 1, 0, 0, 0,},
+			  {0, 0, 0, 1, 1, 0, 0, 1,},
+			  {0, 0, 0, 1, 1, 0, 1, 1,},
+			  {0, 0, 0, 1, 1, 0, 1, 0,},
+			  {0, 0, 0, 1, 1, 1, 1, 0,},
+			  {0, 0, 0, 1, 1, 1, 1, 1,},
+			  {0, 0, 0, 1, 1, 1, 0, 1,},
+			  {0, 0, 0, 1, 1, 1, 0, 0,},
+			  {0, 0, 0, 1, 0, 1, 0, 0,},
+			  {0, 0, 0, 1, 0, 1, 0, 1,},
+			  {0, 0, 0, 1, 0, 1, 1, 1,},
+			  {0, 0, 0, 1, 0, 1, 1, 0,},
+			  {0, 0, 0, 1, 0, 0, 1, 0,},
+			  {0, 0, 0, 1, 0, 0, 1, 1,},
+			  {0, 0, 0, 1, 0, 0, 0, 1,},
+			  {0, 0, 0, 1, 0, 0, 0, 0,},
+			  {0, 0, 1, 1, 0, 0, 0, 0,},
+			  {0, 0, 1, 1, 0, 0, 0, 1,},
+			  {0, 0, 1, 1, 0, 0, 1, 1,},
+			  {0, 0, 1, 1, 0, 0, 1, 0,},
+			  {0, 0, 1, 1, 0, 1, 1, 0,},
+			  {0, 0, 1, 1, 0, 1, 1, 1,},
+			  {0, 0, 1, 1, 0, 1, 0, 1,},
+			  {0, 0, 1, 1, 0, 1, 0, 0,},
+			  {0, 0, 1, 1, 1, 1, 0, 0,},
+			  {0, 0, 1, 1, 1, 1, 0, 1,},
+			  {0, 0, 1, 1, 1, 1, 1, 1,},
+			  {0, 0, 1, 1, 1, 1, 1, 0,},
+			  {0, 0, 1, 1, 1, 0, 1, 0,},
+			  {0, 0, 1, 1, 1, 0, 1, 1,},
+			  {0, 0, 1, 1, 1, 0, 0, 1,},
+			  {0, 0, 1, 1, 1, 0, 0, 0,},
+			  {0, 0, 1, 0, 1, 0, 0, 0,},
+			  {0, 0, 1, 0, 1, 0, 0, 1,},
+			  {0, 0, 1, 0, 1, 0, 1, 1,},
+			  {0, 0, 1, 0, 1, 0, 1, 0,},
+			  {0, 0, 1, 0, 1, 1, 1, 0,},
+			  {0, 0, 1, 0, 1, 1, 1, 1,},
+			  {0, 0, 1, 0, 1, 1, 0, 1,},
+			  {0, 0, 1, 0, 1, 1, 0, 0,},
+			  {0, 0, 1, 0, 0, 1, 0, 0,},
+			  {0, 0, 1, 0, 0, 1, 0, 1,},
+			  {0, 0, 1, 0, 0, 1, 1, 1,},
+			  {0, 0, 1, 0, 0, 1, 1, 0,},
+			  {0, 0, 1, 0, 0, 0, 1, 0,},
+			  {0, 0, 1, 0, 0, 0, 1, 1,},
+			  {0, 0, 1, 0, 0, 0, 0, 1,},
+			  {0, 0, 1, 0, 0, 0, 0, 0,},
+			  {0, 1, 1, 0, 0, 0, 0, 0,},
+			  {0, 1, 1, 0, 0, 0, 0, 1,},
+			  {0, 1, 1, 0, 0, 0, 1, 1,},
+			  {0, 1, 1, 0, 0, 0, 1, 0,},
+			  {0, 1, 1, 0, 0, 1, 1, 0,},
+			  {0, 1, 1, 0, 0, 1, 1, 1,},
+			  {0, 1, 1, 0, 0, 1, 0, 1,},
+			  {0, 1, 1, 0, 0, 1, 0, 0,},
+			  {0, 1, 1, 0, 1, 1, 0, 0,},
+			  {0, 1, 1, 0, 1, 1, 0, 1,},
+			  {0, 1, 1, 0, 1, 1, 1, 1,},
+			  {0, 1, 1, 0, 1, 1, 1, 0,},
+			  {0, 1, 1, 0, 1, 0, 1, 0,},
+			  {0, 1, 1, 0, 1, 0, 1, 1,},
+			  {0, 1, 1, 0, 1, 0, 0, 1,},
+			  {0, 1, 1, 0, 1, 0, 0, 0,},
+			  {0, 1, 1, 1, 1, 0, 0, 0,},
+			  {0, 1, 1, 1, 1, 0, 0, 1,},
+			  {0, 1, 1, 1, 1, 0, 1, 1,},
+			  {0, 1, 1, 1, 1, 0, 1, 0,},
+			  {0, 1, 1, 1, 1, 1, 1, 0,},
+			  {0, 1, 1, 1, 1, 1, 1, 1,},
+			  {0, 1, 1, 1, 1, 1, 0, 1,},
+			  {0, 1, 1, 1, 1, 1, 0, 0,},
+			  {0, 1, 1, 1, 0, 1, 0, 0,},
+			  {0, 1, 1, 1, 0, 1, 0, 1,},
+			  {0, 1, 1, 1, 0, 1, 1, 1,},
+			  {0, 1, 1, 1, 0, 1, 1, 0,},
+			  {0, 1, 1, 1, 0, 0, 1, 0,},
+			  {0, 1, 1, 1, 0, 0, 1, 1,},
+			  {0, 1, 1, 1, 0, 0, 0, 1,},
+			  {0, 1, 1, 1, 0, 0, 0, 0,},
+			  {0, 1, 0, 1, 0, 0, 0, 0,},
+			  {0, 1, 0, 1, 0, 0, 0, 1,},
+			  {0, 1, 0, 1, 0, 0, 1, 1,},
+			  {0, 1, 0, 1, 0, 0, 1, 0,},
+			  {0, 1, 0, 1, 0, 1, 1, 0,},
+			  {0, 1, 0, 1, 0, 1, 1, 1,},
+			  {0, 1, 0, 1, 0, 1, 0, 1,},
+			  {0, 1, 0, 1, 0, 1, 0, 0,},
+			  {0, 1, 0, 1, 1, 1, 0, 0,},
+			  {0, 1, 0, 1, 1, 1, 0, 1,},
+			  {0, 1, 0, 1, 1, 1, 1, 1,},
+			  {0, 1, 0, 1, 1, 1, 1, 0,},
+			  {0, 1, 0, 1, 1, 0, 1, 0,},
+			  {0, 1, 0, 1, 1, 0, 1, 1,},
+			  {0, 1, 0, 1, 1, 0, 0, 1,},
+			  {0, 1, 0, 1, 1, 0, 0, 0,},
+			  {0, 1, 0, 0, 1, 0, 0, 0,},
+			  {0, 1, 0, 0, 1, 0, 0, 1,},
+			  {0, 1, 0, 0, 1, 0, 1, 1,},
+			  {0, 1, 0, 0, 1, 0, 1, 0,},
+			  {0, 1, 0, 0, 1, 1, 1, 0,},
+			  {0, 1, 0, 0, 1, 1, 1, 1,},
+			  {0, 1, 0, 0, 1, 1, 0, 1,},
+			  {0, 1, 0, 0, 1, 1, 0, 0,},
+			  {0, 1, 0, 0, 0, 1, 0, 0,},
+			  {0, 1, 0, 0, 0, 1, 0, 1,},
+			  {0, 1, 0, 0, 0, 1, 1, 1,},
+			  {0, 1, 0, 0, 0, 1, 1, 0,},
+			  {0, 1, 0, 0, 0, 0, 1, 0,},
+			  {0, 1, 0, 0, 0, 0, 1, 1,},
+			  {0, 1, 0, 0, 0, 0, 0, 1,},
+			  {0, 1, 0, 0, 0, 0, 0, 0,},
+			  {1, 1, 0, 0, 0, 0, 0, 0,},
+			  {1, 1, 0, 0, 0, 0, 0, 1,},
+			  {1, 1, 0, 0, 0, 0, 1, 1,},
+			  {1, 1, 0, 0, 0, 0, 1, 0,},
+			  {1, 1, 0, 0, 0, 1, 1, 0,},
+			  {1, 1, 0, 0, 0, 1, 1, 1,},
+			  {1, 1, 0, 0, 0, 1, 0, 1,},
+			  {1, 1, 0, 0, 0, 1, 0, 0,},
+			  {1, 1, 0, 0, 1, 1, 0, 0,},
+			  {1, 1, 0, 0, 1, 1, 0, 1,},
+			  {1, 1, 0, 0, 1, 1, 1, 1,},
+			  {1, 1, 0, 0, 1, 1, 1, 0,},
+			  {1, 1, 0, 0, 1, 0, 1, 0,},
+			  {1, 1, 0, 0, 1, 0, 1, 1,},
+			  {1, 1, 0, 0, 1, 0, 0, 1,},
+			  {1, 1, 0, 0, 1, 0, 0, 0,},
+			  {1, 1, 0, 1, 1, 0, 0, 0,},
+			  {1, 1, 0, 1, 1, 0, 0, 1,},
+			  {1, 1, 0, 1, 1, 0, 1, 1,},
+			  {1, 1, 0, 1, 1, 0, 1, 0,},
+			  {1, 1, 0, 1, 1, 1, 1, 0,},
+			  {1, 1, 0, 1, 1, 1, 1, 1,},
+			  {1, 1, 0, 1, 1, 1, 0, 1,},
+			  {1, 1, 0, 1, 1, 1, 0, 0,},
+			  {1, 1, 0, 1, 0, 1, 0, 0,},
+			  {1, 1, 0, 1, 0, 1, 0, 1,},
+			  {1, 1, 0, 1, 0, 1, 1, 1,},
+			  {1, 1, 0, 1, 0, 1, 1, 0,},
+			  {1, 1, 0, 1, 0, 0, 1, 0,},
+			  {1, 1, 0, 1, 0, 0, 1, 1,},
+			  {1, 1, 0, 1, 0, 0, 0, 1,},
+			  {1, 1, 0, 1, 0, 0, 0, 0,},
+			  {1, 1, 1, 1, 0, 0, 0, 0,},
+			  {1, 1, 1, 1, 0, 0, 0, 1,},
+			  {1, 1, 1, 1, 0, 0, 1, 1,},
+			  {1, 1, 1, 1, 0, 0, 1, 0,},
+			  {1, 1, 1, 1, 0, 1, 1, 0,},
+			  {1, 1, 1, 1, 0, 1, 1, 1,},
+			  {1, 1, 1, 1, 0, 1, 0, 1,},
+			  {1, 1, 1, 1, 0, 1, 0, 0,},
+			  {1, 1, 1, 1, 1, 1, 0, 0,},
+			  {1, 1, 1, 1, 1, 1, 0, 1,},
+			  {1, 1, 1, 1, 1, 1, 1, 1,},
+			  {1, 1, 1, 1, 1, 1, 1, 0,},
+			  {1, 1, 1, 1, 1, 0, 1, 0,},
+			  {1, 1, 1, 1, 1, 0, 1, 1,},
+			  {1, 1, 1, 1, 1, 0, 0, 1,},
+			  {1, 1, 1, 1, 1, 0, 0, 0,},
+			  {1, 1, 1, 0, 1, 0, 0, 0,},
+			  {1, 1, 1, 0, 1, 0, 0, 1,},
+			  {1, 1, 1, 0, 1, 0, 1, 1,},
+			  {1, 1, 1, 0, 1, 0, 1, 0,},
+			  {1, 1, 1, 0, 1, 1, 1, 0,},
+			  {1, 1, 1, 0, 1, 1, 1, 1,},
+			  {1, 1, 1, 0, 1, 1, 0, 1,},
+			  {1, 1, 1, 0, 1, 1, 0, 0,},
+			  {1, 1, 1, 0, 0, 1, 0, 0,},
+			  {1, 1, 1, 0, 0, 1, 0, 1,},
+			  {1, 1, 1, 0, 0, 1, 1, 1,},
+			  {1, 1, 1, 0, 0, 1, 1, 0,},
+			  {1, 1, 1, 0, 0, 0, 1, 0,},
+			  {1, 1, 1, 0, 0, 0, 1, 1,},
+			  {1, 1, 1, 0, 0, 0, 0, 1,},
+			  {1, 1, 1, 0, 0, 0, 0, 0,},
+			  {1, 0, 1, 0, 0, 0, 0, 0,},
+			  {1, 0, 1, 0, 0, 0, 0, 1,},
+			  {1, 0, 1, 0, 0, 0, 1, 1,},
+			  {1, 0, 1, 0, 0, 0, 1, 0,},
+			  {1, 0, 1, 0, 0, 1, 1, 0,},
+			  {1, 0, 1, 0, 0, 1, 1, 1,},
+			  {1, 0, 1, 0, 0, 1, 0, 1,},
+			  {1, 0, 1, 0, 0, 1, 0, 0,},
+			  {1, 0, 1, 0, 1, 1, 0, 0,},
+			  {1, 0, 1, 0, 1, 1, 0, 1,},
+			  {1, 0, 1, 0, 1, 1, 1, 1,},
+			  {1, 0, 1, 0, 1, 1, 1, 0,},
+			  {1, 0, 1, 0, 1, 0, 1, 0,},
+			  {1, 0, 1, 0, 1, 0, 1, 1,},
+			  {1, 0, 1, 0, 1, 0, 0, 1,},
+			  {1, 0, 1, 0, 1, 0, 0, 0,},
+			  {1, 0, 1, 1, 1, 0, 0, 0,},
+			  {1, 0, 1, 1, 1, 0, 0, 1,},
+			  {1, 0, 1, 1, 1, 0, 1, 1,},
+			  {1, 0, 1, 1, 1, 0, 1, 0,},
+			  {1, 0, 1, 1, 1, 1, 1, 0,},
+			  {1, 0, 1, 1, 1, 1, 1, 1,},
+			  {1, 0, 1, 1, 1, 1, 0, 1,},
+			  {1, 0, 1, 1, 1, 1, 0, 0,},
+			  {1, 0, 1, 1, 0, 1, 0, 0,},
+			  {1, 0, 1, 1, 0, 1, 0, 1,},
+			  {1, 0, 1, 1, 0, 1, 1, 1,},
+			  {1, 0, 1, 1, 0, 1, 1, 0,},
+			  {1, 0, 1, 1, 0, 0, 1, 0,},
+			  {1, 0, 1, 1, 0, 0, 1, 1,},
+			  {1, 0, 1, 1, 0, 0, 0, 1,},
+			  {1, 0, 1, 1, 0, 0, 0, 0,},
+			  {1, 0, 0, 1, 0, 0, 0, 0,},
+			  {1, 0, 0, 1, 0, 0, 0, 1,},
+			  {1, 0, 0, 1, 0, 0, 1, 1,},
+			  {1, 0, 0, 1, 0, 0, 1, 0,},
+			  {1, 0, 0, 1, 0, 1, 1, 0,},
+			  {1, 0, 0, 1, 0, 1, 1, 1,},
+			  {1, 0, 0, 1, 0, 1, 0, 1,},
+			  {1, 0, 0, 1, 0, 1, 0, 0,},
+			  {1, 0, 0, 1, 1, 1, 0, 0,},
+			  {1, 0, 0, 1, 1, 1, 0, 1,},
+			  {1, 0, 0, 1, 1, 1, 1, 1,},
+			  {1, 0, 0, 1, 1, 1, 1, 0,},
+			  {1, 0, 0, 1, 1, 0, 1, 0,},
+			  {1, 0, 0, 1, 1, 0, 1, 1,},
+			  {1, 0, 0, 1, 1, 0, 0, 1,},
+			  {1, 0, 0, 1, 1, 0, 0, 0,},
+			  {1, 0, 0, 0, 1, 0, 0, 0,},
+			  {1, 0, 0, 0, 1, 0, 0, 1,},
+			  {1, 0, 0, 0, 1, 0, 1, 1,},
+			  {1, 0, 0, 0, 1, 0, 1, 0,},
+			  {1, 0, 0, 0, 1, 1, 1, 0,},
+			  {1, 0, 0, 0, 1, 1, 1, 1,},
+			  {1, 0, 0, 0, 1, 1, 0, 1,},
+			  {1, 0, 0, 0, 1, 1, 0, 0,},
+			  {1, 0, 0, 0, 0, 1, 0, 0,},
+			  {1, 0, 0, 0, 0, 1, 0, 1,},
+			  {1, 0, 0, 0, 0, 1, 1, 1,},
+			  {1, 0, 0, 0, 0, 1, 1, 0,},
+			  {1, 0, 0, 0, 0, 0, 1, 0,},
+			  {1, 0, 0, 0, 0, 0, 1, 1,},
+			  {1, 0, 0, 0, 0, 0, 0, 1,},
+			  {1, 0, 0, 0, 0, 0, 0, 0,},
+	};
+
 	/**
-	 * Public key generated by: http://travistidwell.com/blog/2013/09/06/an-online-rsa-public-and-private-key-generator/
+	 *
 	 */
-	private String PUBLIC_KEY = "-----BEGIN PUBLIC KEY-----\n" +
-			  "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQClA5cKzu5XEGRvDjuJOG73JKiJ\n" +
-			  "7P7G+qxnAYKlzkfE7QXYopiKhX8cFp6sD0W+amR/HOrOBU4DGqazwqpU1kwMLag1\n" +
-			  "r7W1DXJg69EIIznpo18PDN7mYGa0u9FdW5ENKkfTUUvWqMi098ObCC/p2xCTjmEQ\n" +
-			  "x5HQY3s+eJsLZK0UbQIDAQAB\n" +
-			  "-----END PUBLIC KEY-----";
+	private String PUBLIC_KEY = "";
+
 	/**
-	 * Private key generated by: http://travistidwell.com/blog/2013/09/06/an-online-rsa-public-and-private-key-generator/
+	 *
 	 */
-	private String PRIVATE_KEY = "-----BEGIN RSA PRIVATE KEY-----\n" +
-			  "MIICXQIBAAKBgQClA5cKzu5XEGRvDjuJOG73JKiJ7P7G+qxnAYKlzkfE7QXYopiK\n" +
-			  "hX8cFp6sD0W+amR/HOrOBU4DGqazwqpU1kwMLag1r7W1DXJg69EIIznpo18PDN7m\n" +
-			  "YGa0u9FdW5ENKkfTUUvWqMi098ObCC/p2xCTjmEQx5HQY3s+eJsLZK0UbQIDAQAB\n" +
-			  "AoGARkizKs1cwwSeYpcDUL0Stn2Ms8KX+hSHHhCMnyavdvclyFHo+wdFTqdryglv\n" +
-			  "QV17lJCyijHEOpo9as99UUk9djloaaUUDr7LCklGyqxlwlyq66Ud/qzgtK1v4XGt\n" +
-			  "5jneRs3wgizUPFNoXQct692SkJ0He8ere8LHh8VRBit3RVkCQQDuqyC92jo8aA4W\n" +
-			  "VTQSTeRxWicT5JoIURV/kV0Gptmle3GLGJhKlAOOV8rlU5ldZ2CRT/tf0zWqZZ9y\n" +
-			  "5lGMMn43AkEAsP832rZgGkzp5Wm+W0bTJ4QIMv83PiLZyCh12m7ClsAo8tUqi9r9\n" +
-			  "Y0ngUWwf9mJlq92XDfw9KGP5Lx1yCDEQewJAFfWs54sCvLgeQ7PHPL/p+vv+iHgK\n" +
-			  "LCW5wqkPVCNZ9z3qbo/uwz3nLduqEXulqtBuNDCVwnVehLUg/KNwcWPb9QJBAJna\n" +
-			  "wCqWLaOvCAIrkRS21AWdd6McxmB02upqgUeG0A9Kqk2rjnhTu777EMq2OnJpxgdH\n" +
-			  "b27wvBjIDmsuJVmJjNECQQDSoShRrwKLsfU9f1A3THQIZrC71TBRKawbT+jAzBQ+\n" +
-			  "F0oTkJk+Fawestlx8mr+2MHd1W92fEnb8eGn9wfNMRUC\n" +
-			  "-----END RSA PRIVATE KEY-----";
+	private String PRIVATE_KEY = "";
+
+	/**
+	 * Extract all bits from byte array.
+	 *
+	 * @param bytes Bytes array.
+	 * @return All bits from byte array as single values in integer array.
+	 */
+	private int[] extractBits(byte[] bytes) {
+		int result[] = new int[bytes.length * 8];
+
+		int word[] = new int[8];
+		for (int i = 0, k = 0; i < bytes.length; i++) {
+			if (bytes[i] < 0) {
+				word[7] = 1;
+				bytes[i] *= -1;
+			} else {
+				word[7] = 0;
+			}
+
+			for (int j = 0; j < 7; j++) {
+				word[j] = bytes[i] % 2;
+				bytes[i] >>= 1;
+			}
+
+			/*
+			 * Revers bits in order to be MSB first and LSB last.
+			 */
+			for (int j = word.length - 1; j >= 0; j--) {
+				result[k++] = word[j];
+			}
+		}
+
+		return result;
+	}
 
 	/**
 	 * Generate mask for watermark bits,
@@ -111,6 +387,7 @@ public class MainActivity extends AppCompatActivity {
 
 	/**
 	 * Put zeros in each bit which will be used during watarmarking process.
+	 *
 	 * @param pixels Array with RGB image pixels.
 	 * @param width  Width of the image.
 	 * @param height Height of the image.
@@ -276,10 +553,12 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	/**
-	 * @param pixels
-	 * @param width
-	 * @param height
-	 * @return
+	 * Generate array with CRC codes by blocks.
+	 *
+	 * @param pixels Array with RGB image pixels.
+	 * @param width  Width of the image.
+	 * @param height Height of the image.
+	 * @return Array of blocks CRCs.
 	 */
 	private long[] calculateCRCs(int[] pixels, int width, int height) {
 		/*
@@ -318,6 +597,87 @@ public class MainActivity extends AppCompatActivity {
 		}
 
 		return crcCodes;
+	}
+
+	/**
+	 * Put gray codes in the less significant bits as mash.
+	 *
+	 * @param pixels Array with RGB image pixels.
+	 * @param width  Width of the image.
+	 * @param height Height of the image.
+	 */
+	private void grayCodeImage(int[] pixels, int width, int height) {
+		/*
+		 * Loop over image diagonally.
+		 */
+		for (int j1 = 0, k = 0, l = 0; j1 < 2 * height; j1 += SMALL_MESH_GAP_SIZE) {
+			for (int i = 0; i <= j1; i += SMALL_MESH_GAP_SIZE) {
+				/*
+				 * Calculate index for the diagonal order.
+				 */
+				int j = j1 - i;
+
+				/*
+				 * Check for array bounds.
+				 */
+				if (i >= width || j >= height) {
+					continue;
+				}
+
+				/*
+				 * Loop over red, green and blue channels.
+				 */
+				for (int c = 0; c <= 16; c += 8) {
+					pixels[i + width * j] &= (0xFFFFFF & (GRAY_CODES_8[k][l] << c));
+
+					/*
+					 * Move across gray bits array.
+					 */
+					l++;
+					if (l >= GRAY_CODES_8[k].length) {
+						l = 0;
+						k++;
+					}
+					if (k >= GRAY_CODES_8.length) {
+						k = 0;
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Put digital signature as watermark in the third less significant bits.
+	 *
+	 * @param signature Digital signature.
+	 * @param pixels    Array with RGB image pixels.
+	 * @param width     Width of the image.
+	 * @param height    Height of the image.
+	 */
+	private void watermarkImage(byte[] signature, int[] pixels, int width, int height) {
+		int bits[] = extractBits(signature);
+
+		/*
+		 * Loop over big mesh points.
+		 */
+		for (int j = SMALL_MESH_GAP_SIZE / 2, k = 0; j < height; j += BIG_MESH_GAP_SIZE) {
+			for (int i = SMALL_MESH_GAP_SIZE / 2; i < width; i += BIG_MESH_GAP_SIZE) {
+				/*
+				 * Loop over red, green and blue channels.
+				 */
+				for (int c = 0; c <= 16; c += 8) {
+					/*
+					 * Third less significant bits are used.
+					 */
+					pixels[i + width * j] &= (0xFFFFFF & (bits[k] << (c + 3)));
+
+					/*
+					 * Loop over digital signature bits.
+					 */
+					k = (k + 1) % bits.length;
+				}
+			}
+		}
 	}
 
 	/**
@@ -368,33 +728,48 @@ public class MainActivity extends AppCompatActivity {
 			int[] mask = zeroWatarmarkBits(pixels, bitmap.getWidth(), bitmap.getHeight());
 
 			/*
-			 * DSA digital sign.
-			 */
-			byte[] signature = signImage(pixels, PUBLIC_KEY);
-
-			//TODO Meta data createion.
-
-			/*
 			 * CRC codes generation.
 			 */
 			long[] crcCodes = calculateCRCs(pixels, bitmap.getWidth(), bitmap.getHeight());
 
-			//TODO Gray codes mash generation.
-			int[] mesh = null;//grayCodesMesh(mask, bitmap.getWidth(), bitmap.getHeight());
+			/*
+			 * DSA digital sign.
+			 */
+			byte[] signature = signImage(pixels, PUBLIC_KEY);
 
-			//TODO Watermarking with digital stamp.
-			int[] steganography = null;//watermarkTheImage(pixels, signature, gray);
+			/*
+			 * Gray codes mash generation into image.
+			 */
+			grayCodeImage(pixels, bitmap.getWidth(), bitmap.getHeight());
+
+			/*
+			 * Watermarking with digital stamp.
+			 */
+			watermarkImage(signature, pixels, bitmap.getWidth(), bitmap.getHeight());
 
 			/*
 			 * SNR calculation.
 			 */
-			calculateSignalToNoiceRatio(pixels, steganography);
+			int original[] = new int[bitmap.getWidth() * bitmap.getHeight()];
+			bitmap.getPixels(original, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
+			double snr[] = calculateSignalToNoiceRatio(original, pixels);
 
 			/*
 			 * Save bitmap image file.
 			 */
 			Bitmap watermarked = Bitmap.createBitmap(pixels, 0, bitmap.getWidth(), bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
 			saveImageToFile(watermarked, crcCodes, "" + System.currentTimeMillis() + ".png");
+
+			/*
+			 * Report signal to noise ratio in the user interface.
+			 */
+			String text = "";
+			for (int i = 0; i < snr.length; i++) {
+				text += snr[i];
+				text += "\t";
+			}
+			text = text.trim();
+			((TextView) findViewById(R.id.textView)).setText(text);
 		}
 	}
 }

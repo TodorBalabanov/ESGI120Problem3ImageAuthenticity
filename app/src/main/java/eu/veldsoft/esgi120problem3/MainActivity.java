@@ -50,6 +50,9 @@ public class MainActivity extends AppCompatActivity {
 	 */
 	private static int BIG_MESH_GAP_SIZE = 128;
 
+	/**
+	 * Gray codes values.
+	 */
 	private static int GRAY_CODES_8[][] = {
 			  {0, 0, 0, 0, 0, 0, 0, 0,},
 			  {0, 0, 0, 0, 0, 0, 0, 1,},
@@ -408,9 +411,11 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	/**
-	 * @param pixels
-	 * @param key
-	 * @return
+	 * Digital signing of the image.
+	 *
+	 * @param pixels Array with RGB image pixels.
+	 * @param key    Key to sign with.
+	 * @return Signature bytes.
 	 */
 	private byte[] signImage(int pixels[], String key) {
 		/*
@@ -442,7 +447,7 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	/**
-	 * Singal to noise ratio calculation.
+	 * Signal to noise ratio calculation.
 	 *
 	 * @param original    The origial image as RGB pixesl array.
 	 * @param watermarked The watermarked image as RGB pixels array.
@@ -681,7 +686,19 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	/**
-	 * @param savedInstanceState
+	 * Take photo request.
+	 *
+	 * @param view
+	 */
+	private void takePhoto(View view) {
+		Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+		if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+			startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
 	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -690,86 +707,80 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	/**
-	 * @param view
-	 */
-	public void takePhoto(View view) {
-		Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-		if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-			startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-		}
-	}
-
-	/**
-	 * @param requestCode
-	 * @param resultCode
-	 * @param data
+	 * {@inheritDoc}
 	 */
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-			Bitmap bitmap = (Bitmap) data.getExtras().get("data");
-			((ImageView) findViewById(R.id.imageView)).setImageBitmap(bitmap);
-
-			//TODO Do all time consuming calculations in separate thread.
-
-			/*
-			 * Image information as array of RGB pixels.
-			 */
-			int pixels[] = new int[bitmap.getWidth() * bitmap.getHeight()];
-
-			/*
-			 * Obtain image pixels as bytes array.
-			 */
-			bitmap.getPixels(pixels, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
-
-			/*
-			 * Put zeros all bits which will be used in the watermarking process.
-			 */
-			int[] mask = zeroWatarmarkBits(pixels, bitmap.getWidth(), bitmap.getHeight());
-
-			/*
-			 * CRC codes generation.
-			 */
-			long[] crcCodes = calculateCRCs(pixels, bitmap.getWidth(), bitmap.getHeight());
-
-			/*
-			 * DSA digital sign.
-			 */
-			byte[] signature = signImage(pixels, PUBLIC_KEY);
-
-			/*
-			 * Gray codes mash generation into image.
-			 */
-			grayCodeImage(pixels, bitmap.getWidth(), bitmap.getHeight());
-
-			/*
-			 * Watermarking with digital stamp.
-			 */
-			watermarkImage(signature, pixels, bitmap.getWidth(), bitmap.getHeight());
-
-			/*
-			 * SNR calculation.
-			 */
-			int original[] = new int[bitmap.getWidth() * bitmap.getHeight()];
-			bitmap.getPixels(original, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
-			double snr[] = calculateSignalToNoiceRatio(original, pixels);
-
-			/*
-			 * Save bitmap image file.
-			 */
-			Bitmap watermarked = Bitmap.createBitmap(pixels, 0, bitmap.getWidth(), bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-			saveImageToFile(watermarked, crcCodes, "" + System.currentTimeMillis() + ".png");
-
-			/*
-			 * Report signal to noise ratio in the user interface.
-			 */
-			String text = "";
-			for (int i = 0; i < snr.length; i++) {
-				text += snr[i];
-				text += "\t";
-			}
-			text = text.trim();
-			((TextView) findViewById(R.id.textView)).setText(text);
+		if (requestCode != REQUEST_IMAGE_CAPTURE) {
+			return;
 		}
+
+		if (resultCode != RESULT_OK) {
+			return;
+		}
+
+		Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+		((ImageView) findViewById(R.id.imageView)).setImageBitmap(bitmap);
+
+		//TODO Do all time consuming calculations in separate thread.
+
+		/*
+		 * Image information as array of RGB pixels.
+		 */
+		int pixels[] = new int[bitmap.getWidth() * bitmap.getHeight()];
+
+		/*
+		 * Obtain image pixels as bytes array.
+		 */
+		bitmap.getPixels(pixels, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
+
+		/*
+		 * Put zeros all bits which will be used in the watermarking process.
+		 */
+		int[] mask = zeroWatarmarkBits(pixels, bitmap.getWidth(), bitmap.getHeight());
+
+		/*
+		 * CRC codes generation.
+		 */
+		long[] crcCodes = calculateCRCs(pixels, bitmap.getWidth(), bitmap.getHeight());
+
+		/*
+		 * DSA digital sign.
+		 */
+		byte[] signature = signImage(pixels, PUBLIC_KEY);
+
+		/*
+		 * Gray codes mash generation into image.
+		 */
+		grayCodeImage(pixels, bitmap.getWidth(), bitmap.getHeight());
+
+		/*
+		 * Watermarking with digital stamp.
+		 */
+		watermarkImage(signature, pixels, bitmap.getWidth(), bitmap.getHeight());
+
+		/*
+		 * SNR calculation.
+		 */
+		int original[] = new int[bitmap.getWidth() * bitmap.getHeight()];
+		bitmap.getPixels(original, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
+		double snr[] = calculateSignalToNoiceRatio(original, pixels);
+
+		/*
+		 * Save bitmap image file.
+		 */
+		Bitmap watermarked = Bitmap.createBitmap(pixels, 0, bitmap.getWidth(), bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+		saveImageToFile(watermarked, crcCodes, "" + System.currentTimeMillis() + ".png");
+
+		/*
+		 * Report signal to noise ratio in the user interface.
+		 */
+		String text = "";
+		for (int i = 0; i < snr.length; i++) {
+			text += snr[i];
+			text += "\t";
+		}
+		text = text.trim();
+		((TextView) findViewById(R.id.textView)).setText(text);
 	}
 }

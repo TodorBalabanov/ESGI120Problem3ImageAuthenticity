@@ -44,7 +44,7 @@ final class Util {
 	/**
 	 * Gray codes values.
 	 */
-	private static int GRAY_CODES_8[][] = {
+	private static int GRAY_CODES_EIGHT[][] = {
 			  {0, 0, 0, 0, 0, 0, 0, 0,},
 			  {0, 0, 0, 0, 0, 0, 0, 1,},
 			  {0, 0, 0, 0, 0, 0, 1, 1,},
@@ -482,12 +482,37 @@ final class Util {
 		return rgb;
 	}
 
-	/**
-	 * Save watermarked image in the local device storage.
-	 *
-	 * @param image Bitmap object.
-	 * @param name  Name of the file.
-	 */
+	 /**
+	  * Save image of the pixels in a file.
+	  *
+	  * @param context UI context.
+	  * @param pixels Imge as array of pixels.
+	  * @param name Name of the file.
+	  */
+	 static void savePixelsToFile(Context context, int pixels[], int width, int height, String name) {
+		  Bitmap image = Bitmap.createBitmap(pixels, 0, width, width, height, Bitmap.Config.ARGB_8888);
+
+		/*
+		 * Store PNG file in the local file system.
+		 */
+		  try {
+				FileOutputStream out = context.openFileOutput(name, Context.MODE_PRIVATE);
+				image.compress(Bitmap.CompressFormat.PNG, 100, out);
+				out.close();
+		  } catch (FileNotFoundException e) {
+				e.printStackTrace();
+		  } catch (IOException e) {
+				e.printStackTrace();
+		  }
+	 }
+
+		  /**
+			* Save watermarked image in the local device storage.
+			*
+			* @param context UI context.
+			* @param image Bitmap object.
+			* @param name Name of the file.
+			*/
 	static void saveImageToFile(Context context, Bitmap image, long crcs[], String name) {
 		/*
 		 * Temporary file without meta data written.
@@ -510,8 +535,8 @@ final class Util {
 		/*
 		 * Put image size and CRCs in file meta data.
 		 */
-		PngReader reader = new PngReader(new File(noMetadataPngFileName));
-		PngWriter writer = new PngWriter(new File(name), reader.imgInfo, true);
+		PngReader reader = new PngReader(new File(context.getFilesDir(), noMetadataPngFileName));
+		PngWriter writer = new PngWriter(new File(context.getFilesDir(), name), reader.imgInfo, true);
 		writer.copyChunksFrom(reader.getChunksList(), ChunkCopyBehaviour.COPY_ALL);
 
 		//TODO Create parameters for keys as constants or as meta data in manifest file.
@@ -615,17 +640,17 @@ final class Util {
 				 * Loop over red, green and blue channels.
 				 */
 				for (int c = 0; c <= 16; c += 8) {
-					pixels[i + width * j] &= (0xFFFFFF & (GRAY_CODES_8[k][l] << c));
+					pixels[i + width * j] &= (0xFFFFFF & (GRAY_CODES_EIGHT[k][l] << c));
 
 					/*
 					 * Move across gray bits array.
 					 */
 					l++;
-					if (l >= GRAY_CODES_8[k].length) {
+					if (l >= GRAY_CODES_EIGHT[k].length) {
 						l = 0;
 						k++;
 					}
-					if (k >= GRAY_CODES_8.length) {
+					if (k >= GRAY_CODES_EIGHT.length) {
 						k = 0;
 					}
 				}

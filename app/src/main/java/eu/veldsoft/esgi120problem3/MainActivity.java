@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
 		}
 
 		Bitmap bitmap = (Bitmap) data.getExtras().get("data");
-		((ImageView) findViewById(R.id.imageView)).setImageBitmap(bitmap);
+		((ImageView) findViewById(R.id.image)).setImageBitmap(bitmap);
 
 		//TODO Do all time consuming calculations in separate thread.
 
@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
 		 * Obtain image pixels as bytes array.
 		 */
 		bitmap.getPixels(pixels, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
+		 Util.savePixelsToFile(this, pixels, bitmap.getWidth(), bitmap.getHeight(), "original" + System.currentTimeMillis() + ".png");
 
 		/*
 		 * Put zeros all bits which will be used in the watermarking process.
@@ -93,11 +94,13 @@ public class MainActivity extends AppCompatActivity {
 		 * Gray codes mash generation into image.
 		 */
 		Util.grayCodeImage(pixels, bitmap.getWidth(), bitmap.getHeight());
+		 Util.savePixelsToFile(this, pixels, bitmap.getWidth(), bitmap.getHeight(), "grayed" + System.currentTimeMillis() + ".png");
 
 		/*
 		 * Watermarking with digital stamp.
 		 */
 		Util.watermarkImage(signature, pixels, bitmap.getWidth(), bitmap.getHeight());
+		 Util.savePixelsToFile(this, pixels, bitmap.getWidth(), bitmap.getHeight(), "watermarked" + System.currentTimeMillis() + ".png");
 
 		/*
 		 * SNR calculation.
@@ -110,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
 		 * Save bitmap image file.
 		 */
 		Bitmap watermarked = Bitmap.createBitmap(pixels, 0, bitmap.getWidth(), bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-		Util.saveImageToFile(this, watermarked, crcCodes, "" + System.currentTimeMillis() + ".png");
+		Util.saveImageToFile(this, watermarked, crcCodes, "final" + System.currentTimeMillis() + ".png");
 
 		/*
 		 * Report signal to noise ratio in the user interface.
@@ -121,6 +124,6 @@ public class MainActivity extends AppCompatActivity {
 			text += "\t";
 		}
 		text = text.trim();
-		((TextView) findViewById(R.id.textView)).setText(text);
+		((TextView) findViewById(R.id.text)).setText(text);
 	}
 }

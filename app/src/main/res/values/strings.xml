@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ESGI120 Problem3</string>
+    <string name="app_name">ESGI120 Problem 3</string>
     <string name="button">Take Photo</string>
     <string name="image">Taken Photo</string>
 </resources>

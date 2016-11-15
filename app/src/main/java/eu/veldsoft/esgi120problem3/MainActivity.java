@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
 		/*
 		 * Watermarking with digital stamp.
 		 */
-		//TODO Util.watermarkImage(signature, pixels, bitmap.getWidth(), bitmap.getHeight());
+		Util.watermarkImage(signature, pixels, bitmap.getWidth(), bitmap.getHeight());
 
 		/*
 		 * SNR calculation.
@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
 		 * Save bitmap image file.
 		 */
 		Bitmap watermarked = Bitmap.createBitmap(pixels, 0, bitmap.getWidth(), bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-		//TODO Util.saveImageToFile(watermarked, crcCodes, "" + System.currentTimeMillis() + ".png");
+		Util.saveImageToFile(this, watermarked, crcCodes, "" + System.currentTimeMillis() + ".png");
 
 		/*
 		 * Report signal to noise ratio in the user interface.

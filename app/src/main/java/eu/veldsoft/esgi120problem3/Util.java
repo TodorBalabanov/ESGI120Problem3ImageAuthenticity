@@ -1,5 +1,6 @@
 package eu.veldsoft.esgi120problem3;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 
 import java.io.File;
@@ -303,6 +304,12 @@ final class Util {
 	};
 
 	/**
+	 *
+	 */
+	private Util() {
+	}
+
+	/**
 	 * Extract all bits from byte array.
 	 *
 	 * @param bytes Bytes array.
@@ -402,11 +409,10 @@ final class Util {
 		ByteBuffer buffer = ByteBuffer.allocate(pixels.length * 4);
 		buffer.asIntBuffer().put(pixels);
 		try {
-			KeyPairGenerator generator = KeyPairGenerator.getInstance("DSA", "SUN");
-			SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
-			generator.initialize(1024, random);
+			KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+			generator.initialize(1024);
 
-			Signature signature = Signature.getInstance("SHA1withDSA", "SUN");
+			Signature signature = Signature.getInstance("SHA1withRSA");
 			signature.initSign(generator.generateKeyPair().getPrivate());
 			signature.update(buffer);
 
@@ -414,8 +420,6 @@ final class Util {
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		} catch (InvalidKeyException e) {
-			e.printStackTrace();
-		} catch (NoSuchProviderException e) {
 			e.printStackTrace();
 		} catch (SignatureException e) {
 			e.printStackTrace();
@@ -484,17 +488,17 @@ final class Util {
 	 * @param image Bitmap object.
 	 * @param name  Name of the file.
 	 */
-	static void saveImageToFile(Bitmap image, long crcs[], String name) {
+	static void saveImageToFile(Context context, Bitmap image, long crcs[], String name) {
 		/*
 		 * Temporary file without meta data written.
 		 */
-		File noMetadataPng = new File("" + System.currentTimeMillis() + ".png");
+		String noMetadataPngFileName = "" + System.currentTimeMillis() + ".png";
 
 		/*
 		 * Store PNG file in the local file system.
 		 */
 		try {
-			FileOutputStream out = new FileOutputStream(noMetadataPng);
+			FileOutputStream out = context.openFileOutput(noMetadataPngFileName, Context.MODE_PRIVATE);
 			image.compress(Bitmap.CompressFormat.PNG, 100, out);
 			out.close();
 		} catch (FileNotFoundException e) {
@@ -506,7 +510,7 @@ final class Util {
 		/*
 		 * Put image size and CRCs in file meta data.
 		 */
-		PngReader reader = new PngReader(noMetadataPng);
+		PngReader reader = new PngReader(new File(noMetadataPngFileName));
 		PngWriter writer = new PngWriter(new File(name), reader.imgInfo, true);
 		writer.copyChunksFrom(reader.getChunksList(), ChunkCopyBehaviour.COPY_ALL);
 
@@ -661,11 +665,5 @@ final class Util {
 				}
 			}
 		}
-	}
-
-	/**
-	 *
-	 */
-	private Util() {
 	}
 }

@@ -11,8 +11,6 @@ import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.util.Arrays;
@@ -482,37 +480,37 @@ final class Util {
 		return rgb;
 	}
 
-	 /**
-	  * Save image of the pixels in a file.
-	  *
-	  * @param context UI context.
-	  * @param pixels Imge as array of pixels.
-	  * @param name Name of the file.
-	  */
-	 static void savePixelsToFile(Context context, int pixels[], int width, int height, String name) {
-		  Bitmap image = Bitmap.createBitmap(pixels, 0, width, width, height, Bitmap.Config.ARGB_8888);
+	/**
+	 * Save image of the pixels in a file.
+	 *
+	 * @param context UI context.
+	 * @param pixels  Imge as array of pixels.
+	 * @param name    Name of the file.
+	 */
+	static void savePixelsToFile(Context context, int pixels[], int width, int height, String name) {
+		Bitmap image = Bitmap.createBitmap(pixels, 0, width, width, height, Bitmap.Config.ARGB_8888);
 
 		/*
 		 * Store PNG file in the local file system.
 		 */
-		  try {
-				FileOutputStream out = context.openFileOutput(name, Context.MODE_PRIVATE);
-				image.compress(Bitmap.CompressFormat.PNG, 100, out);
-				out.close();
-		  } catch (FileNotFoundException e) {
-				e.printStackTrace();
-		  } catch (IOException e) {
-				e.printStackTrace();
-		  }
-	 }
+		try {
+			FileOutputStream out = context.openFileOutput(name, Context.MODE_PRIVATE);
+			image.compress(Bitmap.CompressFormat.PNG, 100, out);
+			out.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
-		  /**
-			* Save watermarked image in the local device storage.
-			*
-			* @param context UI context.
-			* @param image Bitmap object.
-			* @param name Name of the file.
-			*/
+	/**
+	 * Save watermarked image in the local device storage.
+	 *
+	 * @param context UI context.
+	 * @param image   Bitmap object.
+	 * @param name    Name of the file.
+	 */
 	static void saveImageToFile(Context context, Bitmap image, long crcs[], String name) {
 		/*
 		 * Temporary file without meta data written.

@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
 		 * Obtain image pixels as bytes array.
 		 */
 		bitmap.getPixels(pixels, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
-		 Util.savePixelsToFile(this, pixels, bitmap.getWidth(), bitmap.getHeight(), "original" + System.currentTimeMillis() + ".png");
+		Util.savePixelsToFile(this, pixels, bitmap.getWidth(), bitmap.getHeight(), "original" + System.currentTimeMillis() + ".png");
 
 		/*
 		 * Put zeros all bits which will be used in the watermarking process.
@@ -94,13 +94,13 @@ public class MainActivity extends AppCompatActivity {
 		 * Gray codes mash generation into image.
 		 */
 		Util.grayCodeImage(pixels, bitmap.getWidth(), bitmap.getHeight());
-		 Util.savePixelsToFile(this, pixels, bitmap.getWidth(), bitmap.getHeight(), "grayed" + System.currentTimeMillis() + ".png");
+		Util.savePixelsToFile(this, pixels, bitmap.getWidth(), bitmap.getHeight(), "grayed" + System.currentTimeMillis() + ".png");
 
 		/*
 		 * Watermarking with digital stamp.
 		 */
 		Util.watermarkImage(signature, pixels, bitmap.getWidth(), bitmap.getHeight());
-		 Util.savePixelsToFile(this, pixels, bitmap.getWidth(), bitmap.getHeight(), "watermarked" + System.currentTimeMillis() + ".png");
+		Util.savePixelsToFile(this, pixels, bitmap.getWidth(), bitmap.getHeight(), "watermarked" + System.currentTimeMillis() + ".png");
 
 		/*
 		 * SNR calculation.
@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
 		String text = "";
 		for (int i = 0; i < snr.length; i++) {
 			text += snr[i];
-			text += "\t";
+			text += "\n";
 		}
 		text = text.trim();
 		((TextView) findViewById(R.id.text)).setText(text);

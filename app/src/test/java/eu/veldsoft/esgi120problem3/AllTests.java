@@ -9,7 +9,7 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-		  UtilUnitTest.class })
+		  UtilUnitTest.class})
 public class AllTests {
 
 }

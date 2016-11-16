@@ -354,18 +354,18 @@ final class Util {
 		//TODO Check which is column and which is row.
 		for (int j = 0, gap = SMALL_MESH_GAP_SIZE / 2, k = 0; j < height; j++) {
 			for (int i = 0; i < width; i++, k++) {
-				mask[k] = 0xFFFFFF;
+				mask[k] = 0xFFFFFFFF;
 
 				if (i % SMALL_MESH_GAP_SIZE == 0 && j % SMALL_MESH_GAP_SIZE == 0) {
 					/*
 					 * Less significant bit.
 					 */
-					mask[k] &= 0xFEFEFE;
+					mask[k] &= 0xFFFEFEFE;
 				} else if ((gap + i) % BIG_MESH_GAP_SIZE == 0 && (gap + j) % BIG_MESH_GAP_SIZE == 0) {
 					/*
 					 * Third less significant bit.
 					 */
-					mask[k] &= 0xFBFBFB;
+					mask[k] &= 0xFFFBFBFB;
 				}
 			}
 		}

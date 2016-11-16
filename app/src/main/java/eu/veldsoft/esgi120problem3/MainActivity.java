@@ -79,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
 		 * Put zeros all bits which will be used in the watermarking process.
 		 */
 		int[] mask = Util.zeroWatarmarkBits(Util.watermarkBitsMaskGeneration(bitmap.getWidth(), bitmap.getHeight()), pixels, bitmap.getWidth(), bitmap.getHeight());
+		 Util.savePixelsToFile(this, pixels, bitmap.getWidth(), bitmap.getHeight(), "meshed" + System.currentTimeMillis() + ".png");
 
 		/*
 		 * CRC codes generation.

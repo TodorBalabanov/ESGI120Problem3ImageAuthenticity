@@ -401,19 +401,24 @@ final class Util {
 	 * @return Signature bytes.
 	 */
 	static byte[] signImage(int pixels[], String key) {
+		//TODO Key length 2048 for SHA-3 256.
 		/*
 		 * Convert int array to byte array.
 		 */
 		ByteBuffer buffer = ByteBuffer.allocate(pixels.length * 4);
 		buffer.asIntBuffer().put(pixels);
 		try {
+			//TODO Replace RSA with DSA.
 			KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+			//TODO Use initialization for DSA.
 			generator.initialize(1024);
 
+			//TODO SHA3-256-DSA
 			Signature signature = Signature.getInstance("SHA1withRSA");
 			signature.initSign(generator.generateKeyPair().getPrivate());
 			signature.update(buffer);
 
+			//TODO Check length of the returned value (2x160).
 			return signature.sign();
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();

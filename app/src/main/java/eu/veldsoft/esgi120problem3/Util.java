@@ -402,6 +402,8 @@ final class Util {
 	 */
 	static byte[] signImage(int pixels[], String key) {
 		//TODO Key length 2048 for SHA-3 256.
+		//TODO Seed psudo-random number generator with device and user information with combination of time.
+
 		/*
 		 * Convert int array to byte array.
 		 */
@@ -410,7 +412,8 @@ final class Util {
 		try {
 			//TODO Replace RSA with DSA.
 			KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
-			//TODO Use initialization for DSA.
+
+			//TODO Use initialization for DSA with key and random seed.
 			generator.initialize(1024);
 
 			//TODO SHA3-256-DSA

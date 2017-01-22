@@ -517,9 +517,10 @@ final class Util {
 	 *
 	 * @param context UI context.
 	 * @param image   Bitmap object.
+	 * @param path    Path to the file.
 	 * @param name    Name of the file.
 	 */
-	static void saveImageToFile(Context context, Bitmap image, long crcs[], String name) {
+	static void saveImageToFile(Context context, Bitmap image, long crcs[], File path, String name) {
 		/*
 		 * Temporary file without meta data written.
 		 */
@@ -542,7 +543,7 @@ final class Util {
 		 * Put image size and CRCs in file meta data.
 		 */
 		PngReader reader = new PngReader(new File(context.getFilesDir(), noMetadataPngFileName));
-		PngWriter writer = new PngWriter(new File(context.getFilesDir(), name), reader.imgInfo, true);
+		PngWriter writer = new PngWriter(new File(path, name), reader.imgInfo, true);
 		writer.copyChunksFrom(reader.getChunksList(), ChunkCopyBehaviour.COPY_ALL);
 
 		//TODO Create parameters for keys as constants or as meta data in manifest file.

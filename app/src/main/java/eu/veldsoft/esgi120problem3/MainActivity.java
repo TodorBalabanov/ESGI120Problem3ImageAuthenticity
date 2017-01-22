@@ -1,6 +1,7 @@
 package eu.veldsoft.esgi120problem3;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -8,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.os.Environment;
 
 public class MainActivity extends AppCompatActivity {
 	/**
@@ -30,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
 	 *
 	 * @param view
 	 */
-	protected void takePhoto(View view) {
+	public void shoot(View view) {
 		Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 		if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
 			startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
@@ -79,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
 		 * Put zeros all bits which will be used in the watermarking process.
 		 */
 		int[] mask = Util.zeroWatarmarkBits(Util.watermarkBitsMaskGeneration(bitmap.getWidth(), bitmap.getHeight()), pixels, bitmap.getWidth(), bitmap.getHeight());
-		 Util.savePixelsToFile(this, pixels, bitmap.getWidth(), bitmap.getHeight(), "meshed" + System.currentTimeMillis() + ".png");
+		Util.savePixelsToFile(this, pixels, bitmap.getWidth(), bitmap.getHeight(), "meshed" + System.currentTimeMillis() + ".png");
 
 		/*
 		 * CRC codes generation.
@@ -114,12 +116,19 @@ public class MainActivity extends AppCompatActivity {
 		 * Save bitmap image file.
 		 */
 		Bitmap watermarked = Bitmap.createBitmap(pixels, 0, bitmap.getWidth(), bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-		Util.saveImageToFile(this, watermarked, crcCodes, "final" + System.currentTimeMillis() + ".png");
+		Util.saveImageToFile(this, watermarked, crcCodes, Environment.getExternalStoragePublicDirectory(
+				  Environment.DIRECTORY_PICTURES), "final" + System.currentTimeMillis() + ".png");
 
 		/*
 		 * Report signal to noise ratio in the user interface.
 		 */
 		String text = "";
+		try {
+			text = "" + getPackageManager().getPackageInfo(getPackageName(), 0).applicationInfo.dataDir;
+		} catch (PackageManager.NameNotFoundException e) {
+			e.printStackTrace();
+		}
+		text += "\n";
 		for (int i = 0; i < snr.length; i++) {
 			text += snr[i];
 			text += "\n";

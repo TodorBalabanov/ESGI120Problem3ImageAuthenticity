@@ -1,5 +1,6 @@
 package eu.veldsoft.esgi120problem3;
 
+import java.io.File;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -70,6 +71,9 @@ public class MainActivity extends AppCompatActivity {
 		 * Image information as array of RGB pixels.
 		 */
 		int pixels[] = new int[bitmap.getWidth() * bitmap.getHeight()];
+		String timestamp = "" + System.currentTimeMillis();
+		File path = Environment.getExternalStoragePublicDirectory(
+				  Environment.DIRECTORY_PICTURES);
 
 		/*
 		 * Obtain image pixels as bytes array.
@@ -116,8 +120,7 @@ public class MainActivity extends AppCompatActivity {
 		 * Save bitmap image file.
 		 */
 		Bitmap watermarked = Bitmap.createBitmap(pixels, 0, bitmap.getWidth(), bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-		Util.saveImageToFile(this, watermarked, crcCodes, Environment.getExternalStoragePublicDirectory(
-				  Environment.DIRECTORY_PICTURES), "final" + System.currentTimeMillis() + ".png");
+		Util.saveImageToFile(this, watermarked, crcCodes, path, "final" + timestamp + ".png");
 
 		/*
 		 * Report signal to noise ratio in the user interface.

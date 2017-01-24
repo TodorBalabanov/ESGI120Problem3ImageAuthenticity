@@ -493,16 +493,16 @@ final class Util {
 	 *
 	 * @param context UI context.
 	 * @param pixels  Imge as array of pixels.
-	 * @param name    Name of the file.
+	 * @param file    Name of the file.
 	 */
-	static void savePixelsToFile(Context context, int pixels[], int width, int height, String name) {
+	static void savePixelsToFile(Context context, int pixels[], int width, int height, File file) {
 		Bitmap image = Bitmap.createBitmap(pixels, 0, width, width, height, Bitmap.Config.ARGB_8888);
 
 		/*
 		 * Store PNG file in the local file system.
 		 */
 		try {
-			FileOutputStream out = context.openFileOutput(name, Context.MODE_PRIVATE);
+			FileOutputStream out = new FileOutputStream(file);
 			image.compress(Bitmap.CompressFormat.PNG, 100, out);
 			out.close();
 		} catch (FileNotFoundException e) {

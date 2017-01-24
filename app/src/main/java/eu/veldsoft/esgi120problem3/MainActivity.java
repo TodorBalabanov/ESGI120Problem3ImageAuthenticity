@@ -1,16 +1,18 @@
 package eu.veldsoft.esgi120problem3;
 
-import java.io.File;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.os.Environment;
+
+import java.io.File;
+import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 	/**
@@ -29,15 +31,45 @@ public class MainActivity extends AppCompatActivity {
 	private String PRIVATE_KEY = "000";
 
 	/**
+	 * Time stamp for the moment of image shoot.
+	 */
+	private String timestamp = "";
+
+	/**
+	 * Path to folder for the images.
+	 */
+	private File path = Environment.getExternalStoragePublicDirectory(
+			  Environment.DIRECTORY_PICTURES);
+
+
+	/**
 	 * Take photo request.
 	 *
 	 * @param view
 	 */
 	public void shoot(View view) {
-		Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-		if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-			startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+		timestamp = "" + System.currentTimeMillis();
+
+		Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+		if (intent.resolveActivity(getPackageManager()) == null) {
+			return;
 		}
+
+		File store = null;
+		try {
+			store = File.createTempFile("camera" + timestamp, ".png", path);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		if(store == null) {
+			return;
+		}
+
+		intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(store));
+
+		startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
 	}
 
 	/**
@@ -63,7 +95,6 @@ public class MainActivity extends AppCompatActivity {
 		}
 
 		Bitmap bitmap = (Bitmap) data.getExtras().get("data");
-		((ImageView) findViewById(R.id.image)).setImageBitmap(bitmap);
 
 		//TODO Do all time consuming calculations in separate thread.
 
@@ -71,21 +102,18 @@ public class MainActivity extends AppCompatActivity {
 		 * Image information as array of RGB pixels.
 		 */
 		int pixels[] = new int[bitmap.getWidth() * bitmap.getHeight()];
-		String timestamp = "" + System.currentTimeMillis();
-		File path = Environment.getExternalStoragePublicDirectory(
-				  Environment.DIRECTORY_PICTURES);
 
 		/*
 		 * Obtain image pixels as bytes array.
 		 */
 		bitmap.getPixels(pixels, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
-		Util.savePixelsToFile(this, pixels, bitmap.getWidth(), bitmap.getHeight(), "original" + System.currentTimeMillis() + ".png");
+		Util.savePixelsToFile(this, pixels, bitmap.getWidth(), bitmap.getHeight(), new File(path, "original" + timestamp + ".png"));
 
 		/*
 		 * Put zeros all bits which will be used in the watermarking process.
 		 */
 		int[] mask = Util.zeroWatarmarkBits(Util.watermarkBitsMaskGeneration(bitmap.getWidth(), bitmap.getHeight()), pixels, bitmap.getWidth(), bitmap.getHeight());
-		Util.savePixelsToFile(this, pixels, bitmap.getWidth(), bitmap.getHeight(), "meshed" + System.currentTimeMillis() + ".png");
+		Util.savePixelsToFile(this, pixels, bitmap.getWidth(), bitmap.getHeight(), new File(path, "meshed" + timestamp + ".png"));
 
 		/*
 		 * CRC codes generation.
@@ -101,13 +129,13 @@ public class MainActivity extends AppCompatActivity {
 		 * Gray codes mash generation into image.
 		 */
 		Util.grayCodeImage(pixels, bitmap.getWidth(), bitmap.getHeight());
-		Util.savePixelsToFile(this, pixels, bitmap.getWidth(), bitmap.getHeight(), "grayed" + System.currentTimeMillis() + ".png");
+		Util.savePixelsToFile(this, pixels, bitmap.getWidth(), bitmap.getHeight(), new File(path, "grayed" + timestamp + ".png"));
 
 		/*
 		 * Watermarking with digital stamp.
 		 */
 		Util.watermarkImage(signature, pixels, bitmap.getWidth(), bitmap.getHeight());
-		Util.savePixelsToFile(this, pixels, bitmap.getWidth(), bitmap.getHeight(), "watermarked" + System.currentTimeMillis() + ".png");
+		Util.savePixelsToFile(this, pixels, bitmap.getWidth(), bitmap.getHeight(), new File(path, "watermarked" + timestamp + ".png"));
 
 		/*
 		 * SNR calculation.
@@ -123,15 +151,14 @@ public class MainActivity extends AppCompatActivity {
 		Util.saveImageToFile(this, watermarked, crcCodes, path, "final" + timestamp + ".png");
 
 		/*
+		 * Show image in the view.
+		 */
+		((ImageView) findViewById(R.id.image)).setImageBitmap(bitmap);
+
+		/*
 		 * Report signal to noise ratio in the user interface.
 		 */
 		String text = "";
-		try {
-			text = "" + getPackageManager().getPackageInfo(getPackageName(), 0).applicationInfo.dataDir;
-		} catch (PackageManager.NameNotFoundException e) {
-			e.printStackTrace();
-		}
-		text += "\n";
 		for (int i = 0; i < snr.length; i++) {
 			text += snr[i];
 			text += "\n";
